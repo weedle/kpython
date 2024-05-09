@@ -23,9 +23,12 @@ i = 0
 for arg in sys.argv[1:]:
     i += 1
     param_colors[arg] = COLORS[i % len(COLORS)]
-    proc = str(subprocess.check_output(["grep", arg, "-rn"], universal_newlines=True))
-    for line in proc.split('\n'):
-        lines.add(line.strip())
+    try:
+        proc = str(subprocess.check_output(["grep", arg, "-rn"], universal_newlines=True))
+        for line in proc.split('\n'):
+            lines.add(line.strip())
+    except subprocess.CalledProcessError:
+        print("No results.")
 
 #proc = str(proc).replace(arg, f"{Fore.BLUE}{arg}{Style.RESET_ALL}")
 
