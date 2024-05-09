@@ -46,7 +46,7 @@ for fileSet in fileSets[1:]:
 
 for arg in sys.argv[1:]:
     try:
-        procArgs = ["grep", arg, "-rn"] + list(files)
+        procArgs = ["grep", arg, "-Hrn"] + list(files)
         proc = str(subprocess.check_output(procArgs, universal_newlines=True))
         for line in proc.split('\n'):
             lines.add(line.strip())
