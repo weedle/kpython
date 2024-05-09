@@ -15,22 +15,43 @@ def sort_by_line_number(line):
 
 colorama_init()
 
-lines = set()
 COLORS = [Fore.BLUE, Fore.CYAN, Fore.GREEN, Fore.RED, Fore.YELLOW]
 param_colors = {}
 
 i = 0
+lines = set()
+fileSets = []
 for arg in sys.argv[1:]:
     i += 1
     param_colors[arg] = COLORS[i % len(COLORS)]
     try:
-        proc = str(subprocess.check_output(["grep", arg, "-rn"], universal_newlines=True))
+        # First we want to find all files that mention any of the params
+        proc = str(subprocess.check_output(["grep", arg, "-rl"], universal_newlines=True))
+        files = set()
+        for file in proc.split('\n'):
+            if file != '':
+                files.add(file.strip())
+        fileSets.append(files)
+    except subprocess.CalledProcessError:
+        print(f"No results for {arg}, removing from search.")
+
+if len(fileSets) == 0:
+    print("No results include all args.")
+    exit(0)
+
+files = fileSets[0]
+
+for fileSet in fileSets[1:]:
+    files = files & fileSet
+
+for arg in sys.argv[1:]:
+    try:
+        procArgs = ["grep", arg, "-rn"] + list(files)
+        proc = str(subprocess.check_output(procArgs, universal_newlines=True))
         for line in proc.split('\n'):
             lines.add(line.strip())
     except subprocess.CalledProcessError:
         print("No results.")
-
-#proc = str(proc).replace(arg, f"{Fore.BLUE}{arg}{Style.RESET_ALL}")
 
 lines = list(lines)
 lines.sort(key=sort_by_line_number)
